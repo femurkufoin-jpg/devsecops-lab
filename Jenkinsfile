@@ -30,5 +30,13 @@ pipeline {
                 }
             }
         }
+
+        stage('Dependency Check') {
+            steps {
+                dependencyCheck additionalArguments: '--scan .',
+                odcInstallation: 'DependencyCheck'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
     }
 }
