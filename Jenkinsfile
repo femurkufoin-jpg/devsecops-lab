@@ -37,7 +37,7 @@ pipeline {
 
                 dependencyCheck( 
                     odcInstallation: 'DependencyCheck',
-                    additionalArguments: '--scan . --nvdApiKey $
+                    additionalArguments: "--scan . --nvdApiKey ${NVD_API_KEY}"
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
