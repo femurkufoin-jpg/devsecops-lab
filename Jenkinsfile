@@ -33,8 +33,11 @@ pipeline {
 
         stage('Dependency Check') {
             steps {
-                dependencyCheck additionalArguments: '--scan .',
-                odcInstallation: 'DependencyCheck'
+                withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
+
+                dependencyCheck( 
+                    odcInstallation: 'DependencyCheck',
+                    additionalArguments: '--scan . --nvdApiKey $
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
