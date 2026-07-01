@@ -5,6 +5,11 @@ pipeline {
         maven 'maven3'
     }
 
+    environment {
+        IMAGE_NAME = "kufoin/java-app"
+        IMAGE_TAG = "latest"
+    }
+
     stages {
 
         stage('Checkout') {
@@ -55,6 +60,39 @@ pipeline {
                     --severity HIGH,CRITICAL \
                     .
                 '''
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
+            }
+        }
+
+        stage('Trivy Image Scan') {
+            steps {
+                sh '''
+                    trivy image \
+                    --format table \
+                    --severity HIGH,CRITICAL \
+                    ${IMAGE_NAME}:${IMAGE_TAG}
+                '''
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub',
+                    usernameVariable: 'DOCKER_USERNAME',
+                    passwordVariable: 'DOCKER_PASSWORD'
+                )]) {
+                    sh '''
+                        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+                        docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                        docker logout
+                    '''
+                }
             }
         }
     }
