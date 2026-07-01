@@ -37,13 +37,24 @@ pipeline {
 
                     dependencyCheck(
                         odcInstallation: 'DependencyCheck',
-                        additionalArguments: "--scan . --nvdApiKey ${NVD_API_KEY} --nvdApiDelay 5000",
+                        additionalArguments: "--scan . --nvdApiKey ${NVD_API_KEY} --nvdApiDelay 5000"
                     )
 
                     dependencyCheckPublisher(
                         pattern: '**/dependency-check-report.xml'
                     )
                 }
+            }
+        }
+
+        stage('Trivy File System Scan') {
+            steps {
+                sh '''
+                    trivy fs \
+                    --format table \
+                    --severity HIGH,CRITICAL \
+                    .
+                '''
             }
         }
     }
